@@ -7,10 +7,14 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.AmpDump;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Shooter;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -18,9 +22,10 @@ public class RobotContainer {
   // Subsystems
   private final Intake m_intake = new Intake();
   private final Climber m_climber = new Climber();
-  private final AmpDump m_ampDump = new AmpDump();
   private final Shooter m_shooter = new Shooter();
   private final Drivetrain m_Drivetrain = new Drivetrain();
+
+  private final SendableChooser<Command> autoChooser;
 
   // Xbox Controllers
   private final CommandXboxController m_driverController =
@@ -41,6 +46,9 @@ public class RobotContainer {
     );
     // Configure the trigger bindings
     configureBindings();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   // Control Bindings
@@ -63,10 +71,6 @@ public class RobotContainer {
     // Shoot for Speaker
     m_codriverController.y()
       .whileTrue(m_shooter.Shoot());
-
-    // Dump to Amp
-    m_codriverController.x().debounce(0.1)
-      .toggleOnTrue(m_ampDump.Toggle());
 
     // Co-driver zeroing controls
     m_codriverController.b()
