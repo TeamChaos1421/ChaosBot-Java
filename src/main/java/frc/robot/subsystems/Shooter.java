@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Second;
-
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.Compressor;
@@ -13,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.PneumaticConstants;
-import edu.wpi.first.units.Measure;
 
 public class Shooter extends SubsystemBase {
     // VARIABLES
@@ -80,6 +77,15 @@ public class Shooter extends SubsystemBase {
         ).finallyDo(
             () -> {
                 this.set(0, 0, 0);
+                this.m_Solenoid.set(Value.kReverse);
+            }
+        );
+    }
+
+    public Command Reverse() {
+        return this.run(
+            () -> {
+                this.set(0.1, 0.1, 0.1);
             }
         );
     }

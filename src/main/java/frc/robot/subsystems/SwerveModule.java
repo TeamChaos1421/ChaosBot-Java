@@ -98,6 +98,7 @@ public class SwerveModule extends SubsystemBase{
         this.m_drivingMotor.burnFlash();
         this.m_turningMotor.burnFlash();
 
+        this.m_desiredState = new SwerveModuleState();
         this.m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
         this.m_drivingEncoder.setPosition(0);
     }

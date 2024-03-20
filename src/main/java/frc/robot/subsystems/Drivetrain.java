@@ -53,7 +53,7 @@ public class Drivetrain extends SubsystemBase {
             frontLeftModule.GetPosition(), frontRightModule.GetPosition(),
             backLeftModule.GetPosition(), backRightModule.GetPosition()
         }, 
-        null
+        new Pose2d()
     );
 
     public Drivetrain () {
