@@ -9,10 +9,10 @@ import frc.robot.commands.Autos;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.AmpDump;
 import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
   // Subsystems
@@ -20,6 +20,7 @@ public class RobotContainer {
   private final Climber m_climber = new Climber();
   private final AmpDump m_ampDump = new AmpDump();
   private final Shooter m_shooter = new Shooter();
+  private final Drivetrain m_Drivetrain = new Drivetrain();
 
   // Xbox Controllers
   private final CommandXboxController m_driverController =
@@ -31,12 +32,23 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    m_Drivetrain.setDefaultCommand(
+      m_Drivetrain.Drive(
+        m_driverController.getLeftX(),
+        m_driverController.getLeftY(),
+        m_driverController.getRightX(),
+        !m_driverController.leftBumper().getAsBoolean())
+    );
     // Configure the trigger bindings
     configureBindings();
   }
 
   // Control Bindings
   private void configureBindings() {
+
+    // Zero Gyro
+    m_driverController.y().debounce(0.1)
+      .onTrue(m_Drivetrain.ZeroHeading());
 
     // Intake on
     m_codriverController.a()

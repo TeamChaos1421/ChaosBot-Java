@@ -4,6 +4,14 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Velocity;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -36,6 +44,8 @@ public final class Constants {
   public static class DrivetrainConstants {
     public static final double kTrackWidth = 0.6223;
     public static final double kTrackLength = 0.61595;
+    public static final Measure<Velocity<Distance>> kMaxSpeed = MetersPerSecond.of(4.65);
+    public static final Measure<Velocity<Angle>> kMaxRot = RadiansPerSecond.of((2 * Math.PI) / 60);
   }
 
   // SWERVE MODULE CONSTANTS
