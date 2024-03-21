@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -37,12 +38,17 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    m_shooter.Init();
+
     m_Drivetrain.setDefaultCommand(
-      m_Drivetrain.Drive(
-        m_driverController.getLeftX(),
-        m_driverController.getLeftY(),
-        m_driverController.getRightX(),
-        !m_driverController.leftBumper().getAsBoolean())
+      new TeleopSwerve(
+        m_Drivetrain,
+        () -> m_driverController.getLeftX(),
+        () -> -m_driverController.getLeftY(),
+        () -> m_driverController.getRightX(),
+        () -> m_driverController.leftBumper().getAsBoolean()
+      )
     );
     // Configure the trigger bindings
     configureBindings();
@@ -62,27 +68,28 @@ public class RobotContainer {
     m_codriverController.a()
       .or(m_codriverController.b())
       .or(m_codriverController.y())
-        .whileTrue(m_intake.On());
+        .whileTrue(m_intake.On())
+        .onFalse(m_intake.Off());
 
     // Load for Amp
     m_codriverController.b()
-      .whileTrue(m_shooter.Load());
+      .whileTrue(
+        m_shooter.ResetTimer()
+          .andThen(m_shooter.Load()))
+        .onFalse(m_shooter.Reset());
 
     // Shoot for Speaker
     m_codriverController.y()
-      .whileTrue(m_shooter.Shoot());
-
-    // Co-driver zeroing controls
-    m_codriverController.b()
-      .and(m_codriverController.y())
-        .whileFalse(m_shooter.Zero());
+      .whileTrue(m_shooter.Shoot())
+      .onFalse(m_shooter.Zero());
     
     // Climber controls
-    m_codriverController.rightTrigger(0.1)
-      .or(m_codriverController.leftTrigger(0.1))
-        .onTrue(m_climber.Set(
-          m_codriverController.getRightTriggerAxis() - m_codriverController.getLeftTriggerAxis()
-        ));
+    m_codriverController.rightTrigger()
+      .whileTrue(m_climber.Set(1))
+        .onFalse(m_climber.Set(0));
+    m_codriverController.leftTrigger()
+      .whileTrue(m_climber.Set(-1))
+        .onFalse(m_climber.Set(0));
   }
 
   // Get Auto

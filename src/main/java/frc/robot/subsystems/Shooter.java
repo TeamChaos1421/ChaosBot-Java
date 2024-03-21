@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.PneumaticConstants;
@@ -20,11 +21,12 @@ public class Shooter extends SubsystemBase {
         new TalonFX(MotorConstants.kShooterMidCANId);
     private final TalonFX m_shooterLow = 
         new TalonFX(MotorConstants.kShooterLowCANId);
-        private final Compressor m_compressor = new Compressor(
+    private final Compressor m_compressor = new Compressor(
         PneumaticConstants.kPCMCANId, 
         PneumaticsModuleType.CTREPCM
     );
     private final DoubleSolenoid m_Solenoid = new DoubleSolenoid(
+        PneumaticConstants.kPCMCANId,
         PneumaticsModuleType.CTREPCM,
         PneumaticConstants.kDumpForward, 
         PneumaticConstants.kDumpReverse
@@ -61,26 +63,40 @@ public class Shooter extends SubsystemBase {
         );
     }
 
-    public Command Load() {
-        return this.runOnce(
+    public Command ResetTimer() {
+        return runOnce(
             () -> {
                 this.m_dumpTimer.reset();
                 this.m_dumpTimer.start();
             }
-        ).andThen(
+        );
+    }
+
+    public Command Reset() {
+        return this.runOnce(
             () -> {
-                this.set(-0.075, -0.2, -0.3);
-                if (this.m_dumpTimer.get() > 0.25) {
-                    m_Solenoid.set(Value.kForward);
-                }
-            }
-        ).finallyDo(
-            () -> {
-                this.set(0, 0, 0);
                 this.m_Solenoid.set(Value.kReverse);
+                this.set(0, 0, 0);
             }
         );
     }
+
+    public Command Load() {
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                this.set(-0.05, -0.2, -0.4);
+                if (this.m_dumpTimer.get() > 0.25) {
+                    this.m_Solenoid.set(Value.kForward);
+                }
+            }, 
+            interrupted -> {
+                this.m_Solenoid.set(Value.kForward);
+            }, 
+            () -> this.m_dumpTimer.get() > 1
+        );
+    }
+
 
     public Command Reverse() {
         return this.run(

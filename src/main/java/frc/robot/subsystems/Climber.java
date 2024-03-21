@@ -14,16 +14,11 @@ public class Climber extends SubsystemBase{
             MotorConstants.kClimberCANId,
             MotorType.kBrushless);
 
-    private void set(double speed) {
-        m_climberMotor.set(speed);
-    }
-
-
     // COMMANDS
     public Command Set(double speed) { 
         return this.run(
             () -> {
-                this.set(speed);
+                this.m_climberMotor.set(speed);
             }
         );
     }

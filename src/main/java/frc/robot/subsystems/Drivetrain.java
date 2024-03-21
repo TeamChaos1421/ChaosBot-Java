@@ -7,6 +7,7 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -15,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.BackLeftConstants;
 import frc.robot.Constants.BackRightConstants;
@@ -31,13 +33,13 @@ public class Drivetrain extends SubsystemBase {
     public final AHRS m_gyro = new AHRS(Port.kMXP);
 
     public final Translation2d FrontLeftLocation = new Translation2d(
-        DrivetrainConstants.kTrackWidth / 2, DrivetrainConstants.kTrackLength / 2);
-    public final Translation2d FrontRightLocation = new Translation2d(
         DrivetrainConstants.kTrackWidth / 2, -DrivetrainConstants.kTrackLength / 2);
+    public final Translation2d FrontRightLocation = new Translation2d(
+        DrivetrainConstants.kTrackWidth / 2, DrivetrainConstants.kTrackLength / 2);
     public final Translation2d BackLeftLocation = new Translation2d(
-        -DrivetrainConstants.kTrackWidth / 2, DrivetrainConstants.kTrackLength / 2);
-    public final Translation2d BackRightLocation = new Translation2d(
         -DrivetrainConstants.kTrackWidth / 2, -DrivetrainConstants.kTrackLength / 2);
+    public final Translation2d BackRightLocation = new Translation2d(
+        -DrivetrainConstants.kTrackWidth / 2, DrivetrainConstants.kTrackLength / 2);
     
     public final SwerveDriveKinematics m_Kinematics = new SwerveDriveKinematics(
         FrontLeftLocation,
@@ -84,6 +86,12 @@ public class Drivetrain extends SubsystemBase {
         );
     }
 
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("NavX_gyro", m_gyro.getYaw());
+        SmartDashboard.putNumber("NavX_rot2d", m_gyro.getRotation2d().getDegrees());
+    };
+
     public Pose2d getPose() {
         return m_Odometry.getPoseMeters();
     }
@@ -115,19 +123,19 @@ public class Drivetrain extends SubsystemBase {
 
 
 
-    private void drive(double xSpeed, double ySpeed, double rSpeed, Boolean fieldRelative) {
+    public void drive(double xSpeed, double ySpeed, double rSpeed, Boolean fieldRelative) {
         ChassisSpeeds speeds;
         if (fieldRelative == true) {
             speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                (DrivetrainConstants.kMaxSpeed.times(xSpeed)),
                 (DrivetrainConstants.kMaxSpeed.times(ySpeed)),
+                (DrivetrainConstants.kMaxSpeed.times(xSpeed)),
                 (DrivetrainConstants.kMaxRot.times(rSpeed)),
-                m_gyro.getRotation2d()
+                new Rotation2d(m_gyro.getYaw())
             );
         } else {
             speeds = new ChassisSpeeds(
-                (DrivetrainConstants.kMaxSpeed.times(xSpeed)),
                 (DrivetrainConstants.kMaxSpeed.times(ySpeed)),
+                (DrivetrainConstants.kMaxSpeed.times(xSpeed)),
                 (DrivetrainConstants.kMaxRot.times(rSpeed))
             );
         }

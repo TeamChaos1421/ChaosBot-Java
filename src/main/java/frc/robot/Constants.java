@@ -45,7 +45,7 @@ public final class Constants {
     public static final double kTrackWidth = 0.6223;
     public static final double kTrackLength = 0.61595;
     public static final Measure<Velocity<Distance>> kMaxSpeed = MetersPerSecond.of(4.65);
-    public static final Measure<Velocity<Angle>> kMaxRot = RadiansPerSecond.of((2 * Math.PI) / 60);
+    public static final Measure<Velocity<Angle>> kMaxRot = RadiansPerSecond.of(10);
   }
 
   // SWERVE MODULE CONSTANTS
@@ -70,7 +70,7 @@ public final class Constants {
     public static final String label = "Back Left";
     public static final int turnCANId = 55;
     public static final int driveCANId = 52;
-    public static final double angOffset = -Math.PI;
+    public static final double angOffset = 0;
     public static final SwerveModuleConstants constants = 
       new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label);
 

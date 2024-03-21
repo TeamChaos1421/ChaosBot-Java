@@ -118,9 +118,14 @@ public class SwerveModule extends SubsystemBase{
     }
 
     public void SetState(SwerveModuleState desiredState) {
-        desiredState = SwerveModuleState.optimize(desiredState, this.GetState().angle);
+        SwerveModuleState correctedState  = new SwerveModuleState(
+            desiredState.speedMetersPerSecond,
+            desiredState.angle.plus(angleOffset)
+        );
+        desiredState = SwerveModuleState.optimize(correctedState, this.GetState().angle);
 
         SmartDashboard.putNumber(moduleLabel, desiredState.angle.getDegrees());
+        // SmartDashboard.putNumber(moduleLabel, (this.m_turningEncoder.getPosition() * (180 / Math.PI)));
 
         m_turningPidController.setReference(desiredState.angle.getRadians(), ControlType.kPosition);
         m_drivingPidController.setReference(desiredState.speedMetersPerSecond, ControlType.kVelocity);
