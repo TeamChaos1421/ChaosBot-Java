@@ -93,7 +93,7 @@ public class Shooter extends SubsystemBase {
             interrupted -> {
                 this.m_Solenoid.set(Value.kForward);
             }, 
-            () -> this.m_dumpTimer.get() > 1
+            () -> this.m_dumpTimer.get() > 0.5
         );
     }
 

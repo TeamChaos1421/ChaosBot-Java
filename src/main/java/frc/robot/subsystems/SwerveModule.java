@@ -27,12 +27,14 @@ public class SwerveModule extends SubsystemBase{
     private SparkPIDController m_turningPidController;
     private SparkPIDController m_drivingPidController;
     private SwerveModuleState m_desiredState;
+    public int moduleNumber;
     
     public SwerveModule(SwerveModuleConstants moduleConstants) {
         this.m_turningMotor = new CANSparkMax(moduleConstants.turnMotorID, MotorType.kBrushless);
         this.m_drivingMotor = new CANSparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
         this.angleOffset = new Rotation2d(moduleConstants.angleOffset);
         this.moduleLabel = new String(moduleConstants.label);
+        this.moduleNumber = moduleConstants.moduleNumber;
 
         this.m_turningEncoder = m_turningMotor.getAbsoluteEncoder(Type.kDutyCycle);
         this.m_drivingEncoder = (SparkRelativeEncoder) m_drivingMotor.getEncoder();

@@ -13,6 +13,7 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Shooter;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,6 +51,14 @@ public class RobotContainer {
         () -> m_driverController.leftBumper().getAsBoolean()
       )
     );
+
+    NamedCommands.registerCommand("Intake On", m_intake.On());
+    NamedCommands.registerCommand("Intake Off", m_intake.Off());
+    NamedCommands.registerCommand("Shooter On", m_shooter.Shoot());
+    NamedCommands.registerCommand("Shooter Dump", m_shooter.ResetTimer().andThen(m_shooter.Load()));
+    NamedCommands.registerCommand("Shooter Zero", m_shooter.Zero());
+    NamedCommands.registerCommand("Shooter Reset", m_shooter.Reset());
+
     // Configure the trigger bindings
     configureBindings();
 
@@ -95,6 +104,6 @@ public class RobotContainer {
   // Get Auto
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto();
+    return autoChooser.getSelected();
   }
 }

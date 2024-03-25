@@ -53,17 +53,19 @@ public final class Constants {
     public static final String label = "Front Left";
     public static final int turnCANId = 59;
     public static final int driveCANId = 56;
-    public static final double angOffset = Math.PI;
+    public static final double angOffset = 0;
+    public static final int moduleNumber = 0;
     public static final SwerveModuleConstants constants = 
-      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label);
+      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label, moduleNumber);
   }
   public static class FrontRightConstants {
     public static final String label = "Front Right";
     public static final int turnCANId = 61;
     public static final int driveCANId = 60;
-    public static final double angOffset = 0;
+    public static final double angOffset = Math.PI;
+    public static final int moduleNumber = 1;
     public static final SwerveModuleConstants constants = 
-      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label);
+      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label, moduleNumber);
 
   }
   public static class BackLeftConstants {
@@ -71,8 +73,9 @@ public final class Constants {
     public static final int turnCANId = 55;
     public static final int driveCANId = 52;
     public static final double angOffset = 0;
+    public static final int moduleNumber = 2;
     public static final SwerveModuleConstants constants = 
-      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label);
+      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label, moduleNumber);
 
   }
   public static class BackRightConstants {
@@ -80,8 +83,9 @@ public final class Constants {
     public static final int turnCANId = 57;
     public static final int driveCANId = 58;
     public static final double angOffset = 0;
+    public static final int moduleNumber = 3;
     public static final SwerveModuleConstants constants = 
-      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label);
+      new SwerveModuleConstants(driveCANId, turnCANId, angOffset, label, moduleNumber);
 
   }
 }

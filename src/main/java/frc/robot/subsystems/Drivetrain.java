@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -14,6 +15,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,6 +50,10 @@ public class Drivetrain extends SubsystemBase {
         BackLeftLocation,
         BackRightLocation
     );
+    private final StructArrayPublisher<SwerveModuleState> desiredStatePublisher = NetworkTableInstance.getDefault()
+        .getStructArrayTopic("/RealOutputs/desiredStates", SwerveModuleState.struct).publish();
+    private final StructArrayPublisher<SwerveModuleState> actualStatePublisher = NetworkTableInstance.getDefault()
+        .getStructArrayTopic("/RealOutputs/actualStates", SwerveModuleState.struct).publish();
 
     public final SwerveDriveOdometry m_Odometry = new SwerveDriveOdometry(
         m_Kinematics, 
@@ -59,14 +66,20 @@ public class Drivetrain extends SubsystemBase {
     );
 
     public Drivetrain () {
+        desiredStatePublisher.set(
+            new SwerveModuleState[] {
+                new SwerveModuleState(), new SwerveModuleState(),
+                new SwerveModuleState(), new SwerveModuleState(),
+            }
+        );
         AutoBuilder.configureHolonomic(
             this::getPose, // Robot pose supplier
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
+                    new PIDConstants(.8, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(0.35, 0.0, 0.0), // Rotation PID constants
                     4.65, // Max module speed, in m/s
                     0.4, // Drive base radius in meters. Distance from robot center to furthest module.
                     new ReplanningConfig() // Default path replanning config. See the API for the options here
@@ -78,7 +91,7 @@ public class Drivetrain extends SubsystemBase {
 
               var alliance = DriverStation.getAlliance();
               if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
+                return alliance.get() == DriverStation.Alliance.Blue;
               }
               return false;
             },
@@ -88,8 +101,22 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("NavX_gyro", m_gyro.getYaw());
-        SmartDashboard.putNumber("NavX_rot2d", m_gyro.getRotation2d().getDegrees());
+        SmartDashboard.putNumber("NavX_gyro", m_gyro.getRotation2d().getRadians());
+
+        SwerveModulePosition[] currentSwervePositions = new SwerveModulePosition[] {
+            frontLeftModule.GetPosition(), frontRightModule.GetPosition(),
+            backLeftModule.GetPosition(), backRightModule.GetPosition()
+        };
+        SwerveModuleState[] currentSwerveStates = new SwerveModuleState[] {
+            frontLeftModule.GetState(), frontRightModule.GetState(),
+            backLeftModule.GetState(), backRightModule.GetState()
+        };
+
+        m_Odometry.update(
+            m_gyro.getRotation2d(),
+            currentSwervePositions
+        );
+        actualStatePublisher.set(currentSwerveStates);
     };
 
     public Pose2d getPose() {
@@ -113,11 +140,20 @@ public class Drivetrain extends SubsystemBase {
 
     public void driveRobotRelative(ChassisSpeeds speeds) {
         SwerveModuleState[] moduleStates = m_Kinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DrivetrainConstants.kMaxSpeed);
+        
+        setModuleStates(moduleStates);
 
-        frontLeftModule.SetState(moduleStates[0]);
-        frontRightModule.SetState(moduleStates[1]);
-        backLeftModule.SetState(moduleStates[2]);
-        backRightModule.SetState(moduleStates[3]);
+        desiredStatePublisher.set(moduleStates);
+    }
+
+    public void setModuleStates(SwerveModuleState[] desiredStates) {
+        SwerveDriveKinematics.desaturateWheelSpeeds((desiredStates), DrivetrainConstants.kMaxSpeed);
+        SwerveModule[] mSwerveModules = {frontLeftModule, frontRightModule, backLeftModule, backRightModule};
+
+        for(SwerveModule module : mSwerveModules) {
+            module.SetState(desiredStates[module.moduleNumber]);
+        }
     }
 
 
@@ -146,6 +182,8 @@ public class Drivetrain extends SubsystemBase {
         frontRightModule.SetState(moduleStates[1]);
         backLeftModule.SetState(moduleStates[2]);
         backRightModule.SetState(moduleStates[3]);
+
+        desiredStatePublisher.set(moduleStates);
     }
 
     private void zeroHeading() {
