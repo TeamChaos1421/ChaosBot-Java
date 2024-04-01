@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase {
     public Command On() { 
         return this.runOnce(
             () -> {
-                this.set(1.0);
+                this.set(.7);
             }
         );
     }
