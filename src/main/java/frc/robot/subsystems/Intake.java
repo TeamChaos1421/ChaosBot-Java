@@ -39,4 +39,12 @@ public class Intake extends SubsystemBase {
             }
         );
     }
+
+    public Command Reverse() {
+        return this.runOnce(
+            () -> {
+                this.set(-.7);
+            }
+        );
+    }
 }

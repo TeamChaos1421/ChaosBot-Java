@@ -109,11 +109,13 @@ public class RobotContainer {
           )
         )
         .onFalse(
-          new ParallelCommandGroup(
-            m_intake.Off(),
-            m_Leds.Off()
-          )
+            m_intake.Off()
         );
+    
+    // Reverse Intake
+    m_codriverController.back()
+      .whileTrue(m_intake.Reverse())
+        .onFalse(m_intake.Off());
 
     // Load for Amp
     m_codriverController.b()
