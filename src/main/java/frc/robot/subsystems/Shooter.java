@@ -56,7 +56,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command Shoot() {
-        return this.run(
+        return this.runOnce(
             () -> {
                 this.set(-1, -1, -0.2);
             }
@@ -85,7 +85,7 @@ public class Shooter extends SubsystemBase {
         return new FunctionalCommand(
             () -> {},
             () -> {
-                this.set(-0.05, -0.2, -0.4);
+                this.set(-0.035, -0.2, -0.4);
                 if (this.m_dumpTimer.get() > 0.25) {
                     this.m_Solenoid.set(Value.kForward);
                 }
@@ -97,6 +97,13 @@ public class Shooter extends SubsystemBase {
         );
     }
 
+    public Command Toggle() {
+        return this.runOnce(
+            () -> {
+                this.m_Solenoid.toggle();
+            }
+        );
+    }
 
     public Command Reverse() {
         return this.run(
@@ -107,7 +114,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command Zero() {
-        return this.run(
+        return this.runOnce(
             () -> {
                 this.set(0, 0, 0);
             }

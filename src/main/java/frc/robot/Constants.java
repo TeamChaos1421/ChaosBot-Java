@@ -28,7 +28,8 @@ public final class Constants {
   }
 
   public static class MotorConstants {
-    public static final int kIntakeCANId = 53;
+    public static final int kTopCANId = 53;
+    public static final int kBotCANId = 22;
     public static final int kClimberCANId = 54;
     public static final int kShooterHighCANId = 21;
     public static final int kShooterMidCANId = 23;

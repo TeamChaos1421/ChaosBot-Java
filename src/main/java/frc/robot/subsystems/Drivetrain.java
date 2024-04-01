@@ -1,12 +1,14 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
+import java.util.function.DoubleSupplier;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -15,8 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,6 +51,14 @@ public class Drivetrain extends SubsystemBase {
         BackLeftLocation,
         BackRightLocation
     );
+
+    public final NetworkTable limelight_front = 
+        NetworkTableInstance.getDefault()
+            .getTable("limelight-front");
+    public final NetworkTable limelight_back = 
+        NetworkTableInstance.getDefault()
+            .getTable("limelight-back");
+
     private final StructArrayPublisher<SwerveModuleState> desiredStatePublisher = NetworkTableInstance.getDefault()
         .getStructArrayTopic("/RealOutputs/desiredStates", SwerveModuleState.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> actualStatePublisher = NetworkTableInstance.getDefault()
@@ -78,8 +87,8 @@ public class Drivetrain extends SubsystemBase {
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                    new PIDConstants(.8, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(0.35, 0.0, 0.0), // Rotation PID constants
+                    new PIDConstants(1, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(1, 0.0, 0.0), // Rotation PID constants
                     4.65, // Max module speed, in m/s
                     0.4, // Drive base radius in meters. Distance from robot center to furthest module.
                     new ReplanningConfig() // Default path replanning config. See the API for the options here
@@ -101,6 +110,9 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
+        double[] frontBotPose = limelight_front.getEntry("<botpose_wpiblue>").getDoubleArray(new double[7]);
+        double[] backBotPose = limelight_back.getEntry("<botpose_wpiblue>").getDoubleArray(new double[7]);
+
         SmartDashboard.putNumber("NavX_gyro", m_gyro.getRotation2d().getRadians());
 
         SwerveModulePosition[] currentSwervePositions = new SwerveModulePosition[] {
@@ -149,15 +161,14 @@ public class Drivetrain extends SubsystemBase {
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds((desiredStates), DrivetrainConstants.kMaxSpeed);
-        SwerveModule[] mSwerveModules = {frontLeftModule, frontRightModule, backLeftModule, backRightModule};
 
-        for(SwerveModule module : mSwerveModules) {
-            module.SetState(desiredStates[module.moduleNumber]);
-        }
+        frontLeftModule.SetState(desiredStates[0]);
+        frontRightModule.SetState(desiredStates[1]);
+        backLeftModule.SetState(desiredStates[2]);
+        backRightModule.SetState(desiredStates[3]);
+
+        desiredStatePublisher.set(desiredStates);
     }
-
-
-
 
     public void drive(double xSpeed, double ySpeed, double rSpeed, Boolean fieldRelative) {
         ChassisSpeeds speeds;
@@ -166,7 +177,7 @@ public class Drivetrain extends SubsystemBase {
                 (DrivetrainConstants.kMaxSpeed.times(ySpeed)),
                 (DrivetrainConstants.kMaxSpeed.times(xSpeed)),
                 (DrivetrainConstants.kMaxRot.times(rSpeed)),
-                new Rotation2d(m_gyro.getYaw())
+                Rotation2d.fromDegrees(m_gyro.getYaw())
             );
         } else {
             speeds = new ChassisSpeeds(
@@ -196,6 +207,42 @@ public class Drivetrain extends SubsystemBase {
         return this.run(
             () -> {
                 this.drive(xSpeed, ySpeed, rSpeed, fieldRelative);
+            }
+        );
+    }
+
+    public Command AlignAmp( DoubleSupplier forwardSupplier, DoubleSupplier strafeSupplier) {
+        return this.run(
+            () -> {
+                this.drive(
+                    (
+                        MathUtil.applyDeadband(forwardSupplier.getAsDouble(), 0.1)
+                    ),
+                    (
+                        MathUtil.applyDeadband(strafeSupplier.getAsDouble(), 0.1)
+                    ),
+                        Math.pow(limelight_front.getEntry("tx").getDouble(0) / 10, 3)
+                    ,
+                    false
+                );
+            }
+        );
+    }
+
+    public Command AlignSpeaker( DoubleSupplier forwardSupplier, DoubleSupplier strafeSupplier) {
+        return this.run(
+            () -> {
+                this.drive(
+                    (
+                        MathUtil.applyDeadband(forwardSupplier.getAsDouble(), 0.1)
+                    ),
+                    (
+                        -MathUtil.applyDeadband(strafeSupplier.getAsDouble(), 0.1)
+                    ),
+                        Math.pow(limelight_back.getEntry("tx").getDouble(0) / 25, 3)
+                    ,
+                    false
+                );
             }
         );
     }

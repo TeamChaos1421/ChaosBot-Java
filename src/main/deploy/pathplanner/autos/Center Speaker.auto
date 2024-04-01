@@ -1,0 +1,61 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.348327060290484,
+      "y": 5.559932574410603
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter On"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter Zero"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CenterNote"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CNote to Speaker"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Off"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shooter Zero"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

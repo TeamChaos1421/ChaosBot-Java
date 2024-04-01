@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.760223520447041,
-        "y": 7.736855473710948
+        "x": 1.348327060290484,
+        "y": 5.559932574410603
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7183134366268733,
-        "y": 6.158242316484634
+        "x": 1.7961068649410026,
+        "y": 5.541275082550166
       },
       "isLocked": false,
-      "linkedName": "Amp"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.9062276306370793,
-        "y": 6.3155609947583535
+        "x": 2.9248851224975176,
+        "y": 5.559932574410603
       },
       "prevControl": {
-        "x": 2.417276652735123,
-        "y": 6.455261274158913
+        "x": 2.9342138684277366,
+        "y": 5.559932574410603
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "AmpSideNote"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0,
+    "rotation": 0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Sideways to Amp",
+  "folder": "Center Speaker",
   "previewStartingState": {
-    "rotation": 90.0,
+    "rotation": 0,
     "velocity": 0
   },
   "useDefaultConstraints": true

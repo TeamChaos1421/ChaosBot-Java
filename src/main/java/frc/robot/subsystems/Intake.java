@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -9,13 +10,16 @@ import frc.robot.Constants.MotorConstants;
 
 public class Intake extends SubsystemBase {
     // VARIABLES
-    private final CANSparkMax m_intakeMotor = 
+    private final CANSparkMax m_topIntake = 
         new CANSparkMax(
-            MotorConstants.kIntakeCANId,
-            MotorType.kBrushed);
+            MotorConstants.kTopCANId,
+            MotorType.kBrushless);
+    private final TalonFX m_botIntake = 
+        new TalonFX(MotorConstants.kBotCANId);
 
     private void set(double speed) {
-        m_intakeMotor.set(speed);
+        m_topIntake.set(-speed);
+        m_botIntake.set(-speed);
     }
 
 
